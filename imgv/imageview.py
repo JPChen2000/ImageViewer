@@ -7,12 +7,6 @@ from urllib.parse import unquote
 
 PORT = 8080
 PATH = "./"
-if len(sys.argv) > 1:
-    PATH=sys.argv[1]
-if len(sys.argv) > 2:
-    PORT=int(sys.argv[2])
-
-
 # 定义一个继承自http.server.SimpleHTTPRequestHandler的类
 class ImageRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
@@ -36,7 +30,7 @@ class ImageRequestHandler(http.server.SimpleHTTPRequestHandler):
                     imgs = data['imgs']
                     with open(path, "w") as f:
                         for path in imgs:
-                            f.write("{}\n".format(os.path.join(PATH, path)))
+                            f.write("{}\n".format(path))
                     status = 'success'
             elif data['action'] == "delete":
                 imgs = data['imgs']
@@ -247,7 +241,7 @@ class ImageRequestHandler(http.server.SimpleHTTPRequestHandler):
             const labels = box.getElementsByTagName("input");
             const save = labels[0];
             const del = labels[1];
-            if (!del.chceked) {
+            if (save.checked) {
             const img = box.getElementsByTagName("img")[0];
             if (img) {
     		    const src = img.getAttribute('src');
@@ -367,16 +361,27 @@ class ImageRequestHandler(http.server.SimpleHTTPRequestHandler):
             else:
                 self.send_error(404, "File not found")
 
-# 设置HTTP服务器
-Handler = ImageRequestHandler
-# 允许重用地址
-socketserver.TCPServer.allow_reuse_address = True
+def main():
+    global PATH
+    global PORT
+    if len(sys.argv) > 1:
+        PATH=sys.argv[1]
+    if len(sys.argv) > 2:
+        PORT=int(sys.argv[2])
+    
+    # 设置HTTP服务器
+    Handler = ImageRequestHandler
+    # 允许重用地址
+    socketserver.TCPServer.allow_reuse_address = True
+    
+    with socketserver.TCPServer(("", PORT), Handler) as httpd:
+        print(f"Serving on port {PORT}")
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            print("\nShutting down server...")
+            httpd.shutdown()
+            httpd.server_close()
 
-with socketserver.TCPServer(("", PORT), Handler) as httpd:
-    print(f"Serving on port {PORT}")
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print("\nShutting down server...")
-        httpd.shutdown()
-        httpd.server_close()
+if __name__ == '__main__':
+    main()
