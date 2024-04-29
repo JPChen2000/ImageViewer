@@ -51,6 +51,12 @@ imageview [PATH] [PORT]
 # imageview ./test 5555
 ```
 
+```
+# if u use it on server, u need to do port mapping as
+ssh -L ${PORT}:127.0.0.1:${PORT} ${SERVER_IP}
+# ssh -L 8080:127.0.0.1:8080 98
+```
+
 ## example
 
 ![example](./example/example.png "example")
